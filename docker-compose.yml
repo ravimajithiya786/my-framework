@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  app:
+    build: 
+      context: ./docker
+      dockerfile: Dockerfile
+    container_name: php_app
+    volumes:
+      - ./docker/php.ini:/usr/local/etc/php/php.ini
+      - .:/var/www/html
+    ports:
+      - "8001:80"
+    depends_on:
+      - mysql
+    networks:
+      - app_network
+    environment:
+      DB_HOST: mysql
+      DB_NAME: test
+      DB_USER: root
+      DB_PASSWORD: "root"
+    working_dir: /var/www/html
+    command: ["apache2-foreground"]  # Ensures the container stays running
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: test
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin2
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: "root"
+      PMA_ARBITRARY: 1
+    ports:
+      - "8002:80"
+    networks:
+      - app_network
+
+  composer: 
+    image: composer:latest
+    container_name: composer
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: ["composer", "install"]
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  mysql_data:

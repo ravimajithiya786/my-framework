@@ -1,0 +1,61 @@
+FROM php:8.2-apache
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    unzip \
+    curl \
+    git \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    nano \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+    gd \
+    pdo \
+    pdo_mysql \
+    mbstring \
+    xml \
+    exif \
+    pcntl \
+    bcmath \
+    opcache
+
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/app/public|g' /etc/apache2/sites-available/000-default.conf
+
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Install Node.js & npm
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g npm@latest
+
+# Set working directory and permissions
+WORKDIR /var/www/html
+RUN chown -R www-data:www-data /var/www/html && \
+    chmod -R 755 /var/www/html
+
+# Expose port 80 and 8001 for PHP built-in server
+EXPOSE 80 8001
+
+# Create a custom start script to run both Apache and PHP built-in server
+RUN echo '#!/bin/bash \n\
+    # Set proper permissions \n\
+    chown -R www-data:www-data /var/www/html \n\
+    chmod -R 755 /var/www/html \n\
+    # Start Apache in the background \n\
+    apache2-foreground & \n\
+    # Start PHP built-in server to listen on all IPs (0.0.0.0) on port 8001 \n\
+    php -S 0.0.0.0:8001 -t /var/www/html/public \n\
+    # Wait forever to keep the container running\n\
+    tail -f /dev/null' > /start.sh && chmod +x /start.sh
+
+# Run the custom script as the container entrypoint
+CMD ["/start.sh"]

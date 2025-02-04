@@ -1,0 +1,21 @@
+docker build -f docker/dockerfile -t my-app .
+
+docker build -t my-app .
+
+docker run -d --name my-app -p 8080:80 my-app
+
+docker-compose up -d
+
+docker-compose down
+
+docker-compose down --volumes --remove-orphans
+
+docker-compose down --volumes --remove-orphans
+
+docker exec -it my-app bash
+
+chown -R .:www-data /var/www/html
+
+docker exec -it php_app ls -lah /var/www/html
+
+docker exec -it php_app ls -lah /app/public

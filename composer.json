@@ -1,0 +1,31 @@
+{
+    "name": "ravi/framework",
+    "description": "Basic framework for PHP",
+    "type": "project",
+    "require": {
+        "vlucas/phpdotenv": "^5.6",
+        "symfony/console": "^5.0",
+        "symfony/dependency-injection": "^5.0",
+        "symfony/http-foundation": "^5.0",
+        "symfony/routing": "^5.0",
+        "symfony/event-dispatcher": "^5.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "twig/twig": "^3.0",
+        "monolog/monolog": "^2.0",
+        "doctrine/orm": "^2.10",
+        "filp/whoops": "^2.14",
+        "psr/log": "^1.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ravi Majithiya"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}
